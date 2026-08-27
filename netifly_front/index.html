@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DIVINA VANIDAD BS · CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>window.APP_CONFIG={API_URL:""};</script>
+</head>
+<body>
+<section id="authScreen" class="auth-screen">
+  <div class="auth-card"><div class="brand-mark">DV</div><h1>DIVINA VANIDAD BS</h1><p>Agenda · Clientes · WhatsApp</p>
+    <form id="authForm"><label>Llave de acceso</label><input id="authKey" type="password" required placeholder="Ingresa tu llave"><div id="authError" class="error"></div><button class="primary">Entrar</button></form>
+  </div>
+</section>
+<div id="appShell" class="shell" style="display:none">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark small">DV</div><div><strong>DIVINA VANIDAD</strong><span>BS · CRM</span></div></div>
+    <nav>
+      <button class="nav active" data-view="dashboard">⌂ <span>Inicio</span></button>
+      <button class="nav" data-view="calendar">◫ <span>Citas</span></button>
+      <button class="nav" data-view="inbox">◉ <span>WhatsApp <b id="unreadBadge"></b></span></button>
+      <button class="nav" data-view="customers">♙ <span>Clientes</span></button>
+    </nav>
+    <div class="sidebar-bottom"><div id="waMini" class="wa-mini">WhatsApp · comprobando…</div><button class="nav" id="logoutBtn">↪ <span>Cerrar sesión</span></button></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+  <div><span class="eyebrow">GESTIÓN DEL SALÓN</span><h2 id="viewTitle">Resumen</h2></div>
+  <div class="top-actions">
+    <button class="ghost" id="refreshBtn">↻ Actualizar</button>
+    <div class="new-menu">
+      <button class="primary" id="newMenuBtn" type="button">＋ Nuevo <span class="menu-chevron">⌄</span></button>
+      <div id="newMenuDropdown" class="new-menu-dropdown">
+        <button type="button" id="newCustomerBtn">👤 Nuevo cliente</button>
+        <button type="button" id="newAppointmentMenuBtn">📅 Nueva cita</button>
+      </div>
+    </div>
+  </div>
+</header>
+    <section id="view-dashboard" class="view active-view">
+      <div class="stats-grid"><div class="stat"><span>Citas hoy</span><strong id="statToday">0</strong></div><div class="stat"><span>Clientes</span><strong id="statCustomers">0</strong></div><div class="stat"><span>Mensajes pendientes</span><strong id="statUnread">0</strong></div><div class="stat"><span>WhatsApp</span><strong id="statWA">—</strong></div></div>
+      <div class="grid-2"><div class="panel"><div class="panel-head"><h3>Próximas citas</h3><button class="link" data-view="calendar">Ver agenda</button></div><div id="dashboardAppointments" class="rows"></div></div>
+      <div class="panel"><div class="panel-head"><h3>WhatsApp</h3><span id="waState" class="pill">—</span></div><div id="waPanel" class="wa-connect"><p>Conecta la instancia para comenzar.</p><button class="primary" id="setupWaBtn">Configurar WhatsApp</button><div id="qrBox" class="qr"></div></div></div></div>
+    </section>
+    <section id="view-calendar" class="view"><div class="panel"><div class="panel-head"><h3>Agenda</h3><button class="primary" id="newAppointmentBtn">+ Nueva cita</button></div><div class="calendar-tools"><input id="calendarDate" type="date"><input id="appointmentSearch" placeholder="Buscar cliente..."></div><div id="appointmentsList" class="rows"></div></div></section>
+    <section id="view-inbox" class="view"><div class="inbox"><div class="conversation-list"><div class="searchbox"><input id="conversationSearch" placeholder="Buscar conversación..."></div><div id="conversationList"></div></div><div class="chat"><div id="chatEmpty" class="empty">Selecciona una conversación</div><div id="chatView" style="display:none"><div class="chat-head"><div><strong id="chatName"></strong><span id="chatPhone"></span></div><select id="chatStatus"><option value="bot">Bot activo</option><option value="human">Atención humana</option><option value="paused">Pausada</option></select></div><div id="messages" class="messages"></div><form id="messageForm" class="composer"><input id="messageInput" placeholder="Escribe un mensaje…" autocomplete="off"><button class="primary">Enviar</button></form></div></div>
+      <aside class="customer-card"><div id="chatCustomer">Sin cliente seleccionado</div></aside></section>
+    <section id="view-customers" class="view"><div class="panel"><div class="panel-head"><h3>Clientes</h3><input id="customerSearch" class="search-inline" placeholder="Nombre o teléfono"></div><div id="customersList" class="customer-grid"></div></div></section>
+  </main>
+</div>
+<!-- Modal: nuevo cliente -->
+<div id="customerModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow">CLIENTES</span>
+        <h3>Registrar cliente</h3>
+        <p>Guarda los datos del cliente sin usar ventanas emergentes del navegador.</p>
+      </div>
+      <button class="modal-close" type="button" data-close-modal="customerModal">×</button>
+    </div>
+    <form id="customerForm" class="modal-form">
+      <label>Nombre completo
+        <input id="customerName" type="text" required placeholder="Ej. María López">
+      </label>
+      <label>Celular / WhatsApp
+        <input id="customerPhone" type="tel" required placeholder="+57 300 000 0000">
+      </label>
+      <label>Notas <span>(opcional)</span>
+        <textarea id="customerNotes" rows="3" placeholder="Preferencias, observaciones..."></textarea>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="ghost" data-close-modal="customerModal">Cancelar</button>
+        <button type="submit" class="primary">Guardar cliente</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: nueva cita -->
+<div id="appointmentModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card modal-card-wide">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow">AGENDA</span>
+        <h3>Programar nueva cita</h3>
+        <p>Selecciona un cliente y completa los datos de la cita.</p>
+      </div>
+      <button class="modal-close" type="button" data-close-modal="appointmentModal">×</button>
+    </div>
+    <form id="appointmentForm" class="modal-form">
+      <label>Cliente
+        <select id="appointmentCustomer" required>
+          <option value="">Selecciona un cliente...</option>
+        </select>
+        <small>¿No aparece? Guarda primero el cliente desde <b>＋ Nuevo → Nuevo cliente</b>.</small>
+      </label>
+      <div class="form-grid-2">
+        <label>Fecha
+          <input id="appointmentDate" type="date" required>
+        </label>
+        <label>Hora
+          <input id="appointmentTime" type="time" required value="10:00">
+        </label>
+      </div>
+      <label>Servicio
+        <input id="appointmentService" type="text" required placeholder="Ej. Manicure">
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="ghost" data-close-modal="appointmentModal">Cancelar</button>
+        <button type="submit" class="primary">Guardar cita</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: detalle de cliente -->
+<div id="customerDetailModal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <span class="eyebrow">CRM</span>
+        <h3 id="detailCustomerName">Cliente</h3>
+      </div>
+      <button class="modal-close" type="button" data-close-modal="customerDetailModal">×</button>
+    </div>
+    <div id="customerDetailContent" class="customer-detail-content"></div>
+    <div class="modal-actions">
+      <button type="button" class="ghost" data-close-modal="customerDetailModal">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="auth.js"></script><script src="database.js"></script><script type="module" src="app.js"></script>
+</body></html>
